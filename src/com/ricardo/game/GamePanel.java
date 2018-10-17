@@ -8,6 +8,10 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
+import com.ricardo.game.states.GameStateManager;
+import com.ricardo.game.util.KeyHandler;
+import com.ricardo.game.util.MouseHandler;
+
 public class GamePanel extends JPanel implements Runnable {
 
 	public static int width;
@@ -17,6 +21,10 @@ public class GamePanel extends JPanel implements Runnable {
 	private boolean running = false;
 	private BufferedImage img;
 	private Graphics2D g;
+	
+	private MouseHandler mouse;
+	private KeyHandler key;
+	private GameStateManager gsm;
 
 	public GamePanel(int width, int height) {
 		this.width = width;
@@ -58,7 +66,7 @@ public class GamePanel extends JPanel implements Runnable {
 			int updateCount = 0;
 			while (((now - lastUpdateTime) > TBU) && (updateCount < MUBR)) {
 				update();
-				input();
+				input(mouse, key);
 				lastUpdateTime += TBU;
 				updateCount++;
 			}
@@ -67,14 +75,14 @@ public class GamePanel extends JPanel implements Runnable {
 				lastUpdateTime = now - TBU;
 			}
 
-			input();
+			input(mouse, key);
 			render();
 			draw();
 			lastRenderTime = now;
 			frameCount++;
 
 			int thisSecond = (int) (lastUpdateTime / 1000000000);
-			
+
 			if (thisSecond > lastSecondTime) {
 				if (frameCount != oldFrameCount) {
 					System.out.println("NEW SECOND" + thisSecond + " " + frameCount);
@@ -106,22 +114,24 @@ public class GamePanel extends JPanel implements Runnable {
 		img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		g = (Graphics2D) img.getGraphics();
 
+		mouse = new MouseHandler();
+		key = new KeyHandler(this);
+		gsm = new GameStateManager();
 	}
 
 	public void update() {
-
-		
+		gsm.update();
 	}
 
-	public void input() {
-
+	public void input(MouseHandler mouse, KeyHandler key) {
+		gsm.input(mouse, key);
 	}
 
 	public void render() {
 		if (g != null) {
 			g.setColor(new Color(66, 134, 244));
 			g.fillRect(0, 0, width, height);
-
+			gsm.render(g);
 		}
 
 	}
